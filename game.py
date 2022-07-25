@@ -1,5 +1,5 @@
 from classes import *
-from logic import *
+# from logic import *
 
 
 player1 = Player()
@@ -23,6 +23,6 @@ print(f"{dealer.owner} has a '{dealer.hand[0]}'\n"
       f"")
       # f"Will you take a card? ('yes/y' or 'no/n')")
 
-player1.weight_hand()
 
-print(f"{int(player1.hand[0].weight)}")
+print(f"{player1.hand[0].get_weight()}")
+print(f"{player1.weight_hand()}")

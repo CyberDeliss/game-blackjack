@@ -16,13 +16,16 @@ class Card:
     def __repr__(self):
         return f"{self.suit}, {self.value}"
 
-    def weight(self):
+    def get_weight(self):
         # self.weight
         try:
             if int(self.value) in range(2, 11):
                 self.weight = self.value
         except ValueError:
-            self.weight = 1
+            if self.value in ("J", "Q", "K"):
+                self.weight = 10
+            else:
+                self.weight = 11
         return self.weight
 
 
@@ -86,7 +89,10 @@ class Player:
                 continue
 
     def weight_hand(self):
-        print(f"{self.hand[0]}")
+        total = 0
+        for i in range(0, len(self.hand)):
+            total += self.hand[i].get_weight()
+        return total
 
 
 
