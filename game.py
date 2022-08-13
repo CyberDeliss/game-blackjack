@@ -1,28 +1,77 @@
 from classes import *
-# from logic import *
+
+count_of_players = input_int_count()
+print(f" {count_of_players}")
+players = create_players(count_of_players)
+
+print("List of players:\n")
+for i in range(0,count_of_players):
+    print(f"{players[i]}\n")
 
 
-player1 = Player()
 dealer = Player("Dealer")
 deck = Deck()
 deck.shuffle()
 
-# bet = player1.bet_input()
+for i in range(0,count_of_players):
+    players[i].bet_input()
 
-take_a_card(dealer, deck)
-take_a_card(dealer, deck)
+
+dealer.hit(deck)
+dealer.hit(deck)
 print(f"{dealer.owner} take two cards")
 
-take_a_card(player1, deck)
-take_a_card(player1, deck)
-print(f"{player1.owner} take two cards")
 
-print(f"{dealer.owner} has a '{dealer.hand[0]}'\n"
-      f"Your cards is '{player1.hand}'\n"
-      f" What will you do?\n\n"
-      f"")
-      # f"Will you take a card? ('yes/y' or 'no/n')")
+for i in range(0, count_of_players):
+    players[i].hit(deck)
+    players[i].hit(deck)
+    print(f"{players[i].owner} take two cards")
 
 
-print(f"{player1.hand[0].get_weight()}")
-print(f"{player1.weight_hand()}")
+print(f"{dealer.owner} has a '{dealer.hand[0]}'\n")
+
+for i in range(0, 100):
+    print("\n")
+
+for i in range(0, count_of_players):
+    print(f"{players[i].owner}'s cards are '{players[i].hand}'\n")
+    while True:
+        print("Do you want take a card?")
+        if input_yes():
+            players[i].hit(deck)
+            print(f"{players[i].owner} has a  '{players[i].hand}'")
+            print(f"{players[i].owner}'s weight is {players[i].weight_hand()}")
+            #     add check losing
+            if players[i].weight_hand() > 21:
+                print(f"{players[i].owner}'s losing")
+                # add something after checking
+                break
+        else:
+            break
+
+while dealer.weight_hand() < 17:
+    dealer.hit(deck)
+    print(f"{dealer.owner} has a '{dealer.hand[0]}'")
+    print(f"{dealer.owner}'s weight is {dealer.weight_hand()}")
+    if dealer.weight_hand() > 21:
+        print(f"{dealer.owner}'s losing")
+        # add something after checking
+        break
+
+
+print(f"{dealer.owner} has a '{dealer.hand}'")
+print(f"{dealer.owner}'s weight is {dealer.weight_hand()}")
+print("\n")
+
+
+for i in range(0, count_of_players):
+    print(f"{players[i].owner} has a '{players[i].hand}'")
+    print(f"{players[i].owner}'s weight is {players[i].weight_hand()}")
+    print("\n")
+
+
+print("Do you want to play again? 'Yes' or 'No'")
+if input_yes():
+    pass
+else:
+    pass
