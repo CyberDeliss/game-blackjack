@@ -93,7 +93,7 @@ class Player:
                     self.bet = bet
                     break
                 else:
-                    print(f"Your balance is low than {bet}")
+                    print(f"Your balance is lower than {bet}")
             except ValueError:
                 print("Value Error")
                 continue
@@ -146,10 +146,29 @@ def input_int_count():
     :return: integer number
     """
     while True:
-        count = input("Please, input integer number")
+        count = input("Please, input integer number\n")
         try:
             count = int(count)
             return count
+        except ValueError:
+            print("Value Error")
+            continue
+        except TypeError:
+            print("Type Error")
+            continue
+
+
+def input_name():
+    while True:
+        name = input("Please, input name\n")
+        try:
+            name = name.lower()
+            name = name.capitalize()
+            print(f"Your name is {name}?\n")
+            if input_yes():
+                return name
+            else:
+                continue
         except ValueError:
             print("Value Error")
             continue
@@ -166,35 +185,47 @@ def create_players(_count):
     players = []
     for i in range(0, _count):
         # Add input Name and balance for players
-        player_name = "Name"
+        player_name = input_name()
         player_balance = 10
         player = Player(player_name, player_balance)
         players.append(player)
     return players
 
-# def win_condition(players):
-#     winners = []
-#     for player in players:
-#         if player.weight_hand() <= 21:
-#             winners.append(player)
-#         else:
-#             for one_card in player.hand:
-#                 if one_card.value == "A":
-#                     one_card.weight = 1
-#
-#
-#             if player.owner != "Dealer":
-#                 print(f"{player.owner} lost money ({player.bet})")
-#                 player.make_a_bet(player.bet)
+
+def get_winners(_players):
+    winners = list(filter(lambda player: player.weight_hand() < 22, _players))
+    winners = list(filter(lambda player: player.weight_hand() ==
+                                         max(winners, key=lambda win_player: win_player.weight_hand()).weight_hand(),
+                          winners))
+    return winners
 
 
+def change_money(_players, _winners):
+    for player in _players:
+        if player in _winners:
+            player.balance += player.bet
+        else:
+            player.balance -= player.bet
+        print(f"{player.owner}'s balance is {player.balance}\n")
 
 
+class Game:
 
-# class Game:
-#
-#     def __init__(self):
-#         self.player1 = Player()
-#         self.dealer = Player()
-#         self.deck = Deck()
-#         self.deck.shuffle()
+    def __init__(self):
+        self.dealer = Player("Dealer")
+
+        self.deck = Deck()
+
+    def start_game(self):
+        self.deck.shuffle()
+
+    def circle(self):
+        pass
+
+    def __str__(self):
+        # print info about all players
+        pass
+
+    def end_circle(self):
+        pass
+
