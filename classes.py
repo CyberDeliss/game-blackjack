@@ -12,13 +12,6 @@ class Card:
     def __init__(self, suit, value):
         self.suit = suit
         self.value = value
-        self.weight = 0
-
-    def __repr__(self):
-        return f"{self.suit}, {self.value}"
-
-    def get_weight(self):
-        # self.weight
         try:
             if int(self.value) in range(2, 11):
                 self.weight = self.value
@@ -27,7 +20,15 @@ class Card:
                 self.weight = 10
             else:
                 self.weight = 11
-        return self.weight
+
+    def __repr__(self):
+        return f"{self.suit}, {self.value}"
+
+    def change_weight(self):
+        if self.weight == 11:
+            self.weight = 1
+        elif self.weight == 1:
+            self.weight = 11
 
 
 class Deck:
@@ -65,12 +66,6 @@ class Player:
         """
         self.balance += _num
 
-    # def make_a_bet(self):
-    #     if self.balance >= self.bet:
-    #         self.balance -= self.bet
-    #     else:
-    #         print(f"Your balance is low than {self.bet}")
-
     def print_balance(self):
         print(f"Your balance is {self.balance}")
 
@@ -103,7 +98,7 @@ class Player:
     def weight_hand(self):
         total = 0
         for i in range(0, len(self.hand)):
-            total += self.hand[i].get_weight()
+            total += self.hand[i].weight
         return total
 
     def hit(self, _deck):
@@ -118,6 +113,21 @@ class Player:
 
     def stay(self):
         pass
+
+    def change_the_weight(self):
+        changes = False
+        for card in self.hand:
+            try:
+                if card.value == "A":
+                    print(f"Do you want to change the weight of the card {card}?")
+                    if input_yes():
+                        card.change_weight()
+                        changes = True
+            except ValueError:
+                continue
+            except:
+                continue
+        return changes
 
 
 def input_yes():
@@ -239,9 +249,17 @@ class Game:
 
                 #     add check losing
                 if _player.weight_hand() > 21:
-                    print(f"{_player.owner}'s losing")
-                    # add something after checking
-                    break
+                    if _player.change_the_weight():
+                        if _player.weight_hand() <= 21:
+                            print(f"{_player.owner}'s cards are '{_player.hand}'\n")
+                            print(f"{_player.owner}'s weight is {_player.weight_hand()}")
+                            continue
+                        else:
+                            break
+                    else:
+                        print(f"{_player.owner}'s losing")
+                        # add something after checking
+                        break
             else:
                 for i in range(0, 20):
                     print("\n")
@@ -309,4 +327,5 @@ class Game:
             player.bet = 0
 
         self.dealer.hand = []
+
 
