@@ -37,14 +37,20 @@ class Deck:
 
     def __init__(self):
         self.deck = [Card(suit, value) for suit in self.suits for value in self.num_of_cards]
-        print(self.deck)
 
     def shuffle(self):
         random.shuffle(self.deck)
-        print(self.deck)
 
     def __len__(self):
         return len(self.deck)
+
+    def deal(self):
+        """
+        return last Card from self and delete Card
+        :return: card Card.
+        """
+        card = self.deck.pop()
+        return card
 
 
 class Player:
@@ -107,9 +113,7 @@ class Player:
         and delete it from _deck
         :return: none.
         """
-        i = random.randint(0, len(_deck) - 1)
-        card = _deck.deck.pop(i)
-        self.hand.append(card)
+        self.hand.append(_deck.deal())
 
     def stay(self):
         pass
