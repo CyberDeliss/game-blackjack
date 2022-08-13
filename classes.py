@@ -1,4 +1,5 @@
 import random
+from copy import copy
 
 
 # diamonds # бубны (♦)
@@ -46,17 +47,15 @@ class Deck:
 
 
 class Player:
-    def __init__(self, _owner="Ganya", _balance=100):
+    def __init__(self, _owner="Name", _balance=100):
         self.owner = _owner
-        if self.owner == "Dealer":
-            self.balance = 100000000000
-        else:
-            self.balance = _balance
+        self.dealer = False
+        self.balance = _balance
         self.hand = []
         self.bet = 0
 
     def __str__(self):
-        return f'Owner: {self.owner}\nBalance: {self.balance}'
+        return f"Owner: {self.owner}\nBalance: {self.balance}"
 
     def deposit(self, _num):
         """
@@ -66,11 +65,11 @@ class Player:
         """
         self.balance += _num
 
-    def make_a_bet(self):
-        if self.balance >= self.bet:
-            self.balance -= self.bet
-        else:
-            print(f"Your balance is low than {self.bet}")
+    # def make_a_bet(self):
+    #     if self.balance >= self.bet:
+    #         self.balance -= self.bet
+    #     else:
+    #         print(f"Your balance is low than {self.bet}")
 
     def print_balance(self):
         print(f"Your balance is {self.balance}")
@@ -119,8 +118,6 @@ class Player:
 
     def stay(self):
         pass
-
-
 
 
 def input_yes():
@@ -177,55 +174,139 @@ def input_name():
             continue
 
 
-def create_players(_count):
-    """
-    function creates array of players
-    :return: array of players
-    """
-    players = []
-    for i in range(0, _count):
-        # Add input Name and balance for players
-        player_name = input_name()
-        player_balance = 10
-        player = Player(player_name, player_balance)
-        players.append(player)
-    return players
-
-
-def get_winners(_players):
-    winners = list(filter(lambda player: player.weight_hand() < 22, _players))
-    winners = list(filter(lambda player: player.weight_hand() ==
-                                         max(winners, key=lambda win_player: win_player.weight_hand()).weight_hand(),
-                          winners))
-    return winners
-
-
-def change_money(_players, _winners):
-    for player in _players:
-        if player in _winners:
-            player.balance += player.bet
-        else:
-            player.balance -= player.bet
-        print(f"{player.owner}'s balance is {player.balance}\n")
-
-
 class Game:
-
     def __init__(self):
+        self.players = []
         self.dealer = Player("Dealer")
+        self.dealer.dealer = True
+        self.deck = Deck()
+        self.winners = []
+        self.losers = []
 
+    def start_game(self, _count_players):
+        self.create_players(_count_players)
+
+    def loop(self):
+        self.deck.shuffle()
+        self.players_bet()
+
+        self.dealer.hit(self.deck)
+        self.dealer.hit(self.deck)
+
+        print(f"{self.dealer.owner} has a '{self.dealer.hand[0]}'\n")
+
+        for player in self.players:
+            player.hit(self.deck)
+            player.hit(self.deck)
+
+        for player in self.players:
+            self.player_turn(player)
+
+        self.dealer_turn()
+
+    def end_loop(self):
+        self.get_winners()
+        self.get_losers()
+        self.change_money()
+        self.print_info()
+
+    def create_players(self, _count):
+        """
+        function creates array of players in Game (self.players)
+        :return: None
+        """
+        for i in range(0, _count):
+            player_name = input_name()          # input Name for player
+            player_balance = 10                 # start balance
+
+            player = Player(player_name, player_balance)
+            self.players.append(player)
+
+    def players_bet(self):
+        for i in range(0, len(self.players)):
+            self.players[i].bet_input()
+
+    def player_turn(self, _player):
+        print(f"{_player.owner}'s cards are '{_player.hand}'\n")
+        print(f"{_player.owner}'s weight is {_player.weight_hand()}")
+
+        while True:
+            print("Do you want take a card?")
+            if input_yes():
+                _player.hit(self.deck)
+                print(f"{_player.owner} has a  '{_player.hand}'")
+                print(f"{_player.owner}'s weight is {_player.weight_hand()}")
+
+                #     add check losing
+                if _player.weight_hand() > 21:
+                    print(f"{_player.owner}'s losing")
+                    # add something after checking
+                    break
+            else:
+                for i in range(0, 20):
+                    print("\n")
+                break
+
+    def dealer_turn(self):
+        while self.dealer.weight_hand() < 17:
+            self.dealer.hit(self.deck)
+
+            print(f"{self.dealer.owner} has a '{self.dealer.hand[0]}'")
+            print(f"{self.dealer.owner}'s weight is {self.dealer.weight_hand()}")
+
+            if self.dealer.weight_hand() > 21:
+                print(f"{self.dealer.owner}'s losing")
+                # add something after checking
+                break
+
+    def get_winners(self):
+        temp_players = copy(self.players)
+        temp_players.append(self.dealer)
+        self.winners = list(filter(lambda player: player.weight_hand() < 22, temp_players))
+        self.winners = list(filter(lambda player: player.weight_hand() ==
+                                   max(self.winners, key=lambda win_player: win_player.weight_hand()).weight_hand(),
+                            self.winners))
+
+    def get_losers(self):
+        for player in self.players:
+            if not (player in self.winners):
+                self.losers.append(player)
+
+    def change_money(self):
+        for player in self.players:
+            if player in self.winners:
+                player.balance += player.bet
+            else:
+                player.balance -= player.bet
+                if player.balance <= 0:
+                    print(f"It is game over for {player.owner}. You spent all your money\n")
+                    self.players.remove(player)
+
+    def print_info(self):
+        print("Winners:\n")
+        for player in self.winners:
+            print(f"{player.owner} has a '{player.hand}'")
+            print(f"{player.owner}'s weight is {player.weight_hand()}")
+            print(f"{player.owner}'s balance is {player.balance}")
+            print("\n")
+
+        print("Who loosed but can continue playing:\n")
+
+        for player in self.losers:
+            if player.balance > 0:
+                print(f"{player.owner} has a '{player.hand}'")
+                print(f"{player.owner}'s weight is {player.weight_hand()}")
+                print(f"{player.owner}'s balance is {player.balance}")
+                print("\n")
+
+    def restart_game(self):
+        self.winners = []
+        self.losers = []
         self.deck = Deck()
 
-    def start_game(self):
-        self.deck.shuffle()
+        for player in self.players:
+            player.hand = []
+            player.bet = 0
 
-    def circle(self):
-        pass
-
-    def __str__(self):
-        # print info about all players
-        pass
-
-    def end_circle(self):
-        pass
+        self.dealer.hand = []
 
