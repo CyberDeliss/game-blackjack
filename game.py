@@ -1,4 +1,7 @@
-from classes import *
+"""
+Main file where gamer can to play
+"""
+from classes import Game, input_int_count, input_yes
 
 game = Game()
 
@@ -14,4 +17,5 @@ while True:
     if input_yes() and game.players:
         game.restart_game()
         continue
+    print("Game over")
     break
